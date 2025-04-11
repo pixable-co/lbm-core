@@ -1,0 +1,19 @@
+{
+    "name": "pixable/lbm-core",
+    "description": "LBM Core Plugin by Pixable",
+    "autoload": {
+        "psr-4": {
+            "Pixable\\LBM\\": "commands/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Asaduzzaman Abir",
+            "email": "24668412+anonnaabir00@users.noreply.github.com"
+        }
+    ],
+    "minimum-stability": "stable",
+    "require": {
+        "symfony/console": "^7.2"
+    }
+}
