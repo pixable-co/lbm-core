@@ -8,16 +8,16 @@ if (PHP_SAPI !== 'cli') {
 require __DIR__ . '/vendor/autoload.php'; // Load Composer autoloader
 
 use Symfony\Component\Console\Application;
-use Pixable\FrohubCore\MakeShortcodeCommand;
-use Pixable\FrohubCore\MakeShortcodeReactCommand;
-use Pixable\FrohubCore\MakeAjaxCommand;
-use Pixable\FrohubCore\MakeApiCommand;
+use Pixable\LBM\MakeShortcodeCommand;
+use Pixable\LBM\MakeShortcodeReactCommand;
+use Pixable\LBM\MakeAjaxCommand;
+use Pixable\LBM\MakeApiCommand;
 
 
-use Pixable\FrohubCore\DeleteShortcodeCommand;
-use Pixable\FrohubCore\DeleteShortcodeReactCommand;
-use Pixable\FrohubCore\DeleteAjaxCommand;
-use Pixable\FrohubCore\DeleteApiCommand;
+use Pixable\LBM\DeleteShortcodeCommand;
+use Pixable\LBM\DeleteShortcodeReactCommand;
+use Pixable\LBM\DeleteAjaxCommand;
+use Pixable\LBM\DeleteApiCommand;
 
 // Create a new Symfony Console Application
 $application = new Application();
