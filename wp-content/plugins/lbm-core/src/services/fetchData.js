@@ -1,8 +1,8 @@
-const ajax_url = frohub_settings.ajax_url;
+const ajax_url = lbm_settings.ajax_url;
 
 export const fetchData = (action, callback, additionalParams = {}) => {
     const params = {
-        _ajax_nonce: frohub_settings.nonce,
+        _ajax_nonce: lbm_settings.nonce,
         action: action,
         ...additionalParams,
     };

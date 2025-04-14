@@ -14,6 +14,7 @@ class Enqueue {
 	}
 
 	public function lbm_scripts() {
+	        $current_user_id = get_current_user_id();
 	        wp_enqueue_style( 'lbm-shortcode-style', LBM_ROOT_DIR_URL . 'includes/assets/shortcode/style.css' );
 	        wp_enqueue_script( 'lbm-shortcode-script', LBM_ROOT_DIR_URL . 'includes/assets/shortcode/scripts.js', 'jquery', '0.0.1', true );
 			wp_enqueue_style( 'lbm-build-style', LBM_ROOT_DIR_URL . 'includes/assets/build/frontend.css' );
@@ -24,6 +25,7 @@ class Enqueue {
 				array(
 					'ajax_url'        => admin_url( 'admin-ajax.php' ),
 					'nonce'           => wp_create_nonce( 'lbm_nonce' ),
+					'engineer_id' => get_field('engineer_id', 'user_' . $current_user_id)
 				)
 			);
 
