@@ -1,6 +1,8 @@
 <?php
 namespace LBMCore;
 
+use LBMCore\ZohoWorkdriveUpload;
+
 use LBMCore\GetJobById;
 
 use LBMCore\GetUpcomingJobs;
@@ -18,5 +20,6 @@ class Ajax {
 		GetPastJobs::init();
 		GetUpcomingJobs::init();
 		GetJobById::init();
+		ZohoWorkdriveUpload::init();
 	}
 }
