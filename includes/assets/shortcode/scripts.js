@@ -336,7 +336,7 @@ async function uploadToZoho(file, previewContainer) {
     const result = await checkRes.json();
     if (!result.success) {
         alert('Not authorized with Zoho. Redirecting...');
-        const clientId = '1000.WHI5I22WABVPMWMO7RPJ6AYNVSK42T';
+        const clientId = '1000.ZDSET1BTZH3EOM50JCC6I58FH1GLSZ';
         const redirectUri = 'http://localhost:10028';
         const scope = [
             'workdrive.files.READ',

@@ -9,7 +9,7 @@
 	 * @wordpress-plugin
 	 * Plugin Name:       LMB Core Plugin
 	 * Plugin URI:        https://pixable.co/
-	 * Description:       Core Plugin & Functions For LBM
+	 * Description:       Core Plugin & Functions For LBM For Push
 	 * Version:           0.0.1
 	 * Author:            Pixable
 	 * Author URI:        https://pixable.co/
