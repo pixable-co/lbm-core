@@ -480,7 +480,10 @@ document.addEventListener("DOMContentLoaded", function () {
     const jobId = params.get("id");
     if (!jobId) return (container.innerHTML = "<p>Missing job ID.</p>");
 
-    container.innerHTML = `<p class="job-loading">Loading job details...</p>`;
+    const loader = document.createElement("div");
+    loader.className = "jobs-loader";
+    loader.innerHTML = `<div class="spinner"></div>`;
+    container.appendChild(loader);
 
     fetch(lbm_settings.ajax_url, {
         method: "POST",
@@ -496,12 +499,15 @@ document.addEventListener("DOMContentLoaded", function () {
         .then((res) => res.json())
         .then((response) => {
             if (response.success && response.data?.jobDetails) {
+                container.removeChild(loader);
                 renderJob(container, response.data.jobDetails);
             } else {
+                container.removeChild(loader);
                 container.innerHTML = `<p>Failed to load job: ${response?.data?.message || "unknown error"}</p>`;
             }
         })
         .catch((err) => {
+            container.removeChild(loader);
             container.innerHTML = `<p>Error fetching job details.</p>`;
             console.error(err);
         });
@@ -525,30 +531,36 @@ document.addEventListener("DOMContentLoaded", function () {
         container.innerHTML = `
       <div class="job-wrapper">
         <div class="job-header">
-          <h2>Job > ${job.Job_Id?.replace("JOB - ", "")}</h2>
+          <h3>Job > ${job.Job_Id?.replace("JOB - ", "") || job.Job_Number?.replace("JOB - ", "")}</h3>
           <span class="job-status">${job.Status}</span>
         </div>
 
         <div class="job-meta">
-          <p><strong>Date:</strong> ${dateStr}</p>
-          <p><strong>Time:</strong> ${timeStr}</p>
-          <p><strong>Duration:</strong> ${duration}</p>
-          <div>
+          <div class="job-meta-info"><strong>Date:</strong> ${dateStr}</div>
+          <div class="job-meta-info"><strong>Time:</strong> ${timeStr}</div>
+          <div class="job-meta-info"><strong>Duration:</strong> ${duration}</div>
+          <div class="job-meta-info">
             <strong>Address:</strong>
+            <div>
             <div>${job.Tenant_Address_1?.name || ""}</div>
             <div>${job.Tenant_City || ""}</div>
             <div>${job.Tenant_Post_Code || ""}</div>
+            </div>
           </div>
-          ${job.Sales_Order ? `<p><strong>Sales Order:</strong> ${job.Sales_Order}</p>` : ""}
-          <p><strong>Tenant:</strong> ${job.Tenant_Name} (${job.Tenant_Phone})
+          ${job.Sales_Order ? `<div class="job-meta-info"><strong>Sales Order:</strong> ${job.Sales_Order}</div>` : ""}
+          <div class="job-meta-info">
+            <strong>Tenant:</strong>
+            <div>
+            ${job.Tenant_Name} (${job.Tenant_Phone})
             <a href="tel:${job.Tenant_Phone}" class="job-call">📞</a>
-          </p>
+            </div>
+          </div>
         </div>
 
         <div class="job-actions">
           <button class="btn btn-checkin" onclick="document.querySelector('.checkin-modal').style.display = 'flex'">Check-in</button>
-          <button class="btn">Tenant not in</button>
-          <button class="btn">Further Works</button>
+          <button class="btn" onclick="document.querySelector('.tenant-modal').style.display = 'flex'">Tenant not in</button>
+          <button class="btn" onclick="document.querySelector('.further-modal').style.display = 'flex'">Further Works</button>
         </div>
 
         <div class="job-media">
@@ -596,14 +608,44 @@ document.addEventListener("DOMContentLoaded", function () {
         </div>
       </div>
 
-      <div class="checkin-modal" style="display:none;">
+      <div class="modal checkin-modal" style="display:none;">
         <div class="modal-content">
           <button class="modal-close" onclick="this.closest('.checkin-modal').style.display = 'none'">&times;</button>
           <h2>Check-in</h2>
+          <div class="modal-actions">
           <input type="datetime-local" value="${new Date().toISOString().slice(0, 16)}" class="checkin-time" />
           <button class="btn w-full mt-4" onclick="alert('Check-in saved!'); this.closest('.checkin-modal').style.display = 'none'">Confirm</button>
+          </div>
         </div>
       </div>
+      
+      <!-- Tenant Not In Modal -->
+        <div class="modal tenant-modal" style="display:none;">
+          <div class="modal-content">
+            <button class="modal-close" onclick="this.closest('.modal').style.display = 'none'">&times;</button>
+            <h2>Tenant not in</h2>
+            <div class="modal-actions">
+            <button class="btn w-full mt-4" onclick="alert('Marked as tenant not in!'); this.closest('.modal').style.display = 'none'">Confirm</button>
+            <button class="btn w-full mt-2" onclick="this.closest('.modal').style.display = 'none'">Cancel</button>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Further Works Modal -->
+        <div class="modal further-modal" style="display:none;">
+          <div class="modal-content">
+            <button class="modal-close" onclick="this.closest('.modal').style.display = 'none'">&times;</button>
+            <h2>Request Further Works</h2>
+            <div class="modal-actions">
+                <div>
+                <label for="further-details">Details</label>
+                <textarea id="further-details" rows="4" style="width: 100%; margin-top: 0.5rem; border: 1px solid #ccc; border-radius: 6px; padding: 8px;"></textarea>
+                </div>
+                <button class="btn w-full mt-4" onclick="alert('Further works requested!'); this.closest('.modal').style.display = 'none'">Confirm</button>
+                <button class="btn w-full mt-2" onclick="this.closest('.modal').style.display = 'none'">Cancel</button>
+            </div>
+          </div>
+        </div>
     `;
 
         // Signature pad
