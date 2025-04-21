@@ -105,7 +105,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
                 jobs.forEach(job => {
                     const link = document.createElement("a");
-                    link.href = `/view-job/?id=${job.id}`;
+                    link.href = `/view-job/?id=${job.id}&jobId=${job.displayId}`;
                     link.className = "job-link";
 
                     const card = document.createElement("div");
@@ -275,7 +275,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
                 jobs.forEach(job => {
                     const link = document.createElement("a");
-                    link.href = `/view-job/?id=${job.id}`;
+                    link.href = `/view-job/?id=${job.id}&jobId=${job.displayId}`;
                     link.className = "job-link";
 
                     const card = document.createElement("div");
@@ -472,6 +472,166 @@ function initSignaturePad(container) {
     });
 }
 
+function submitTenantNotIn() {
+    const modal = document.querySelector('.tenant-modal');
+    const payload = JSON.parse(modal.dataset.payload || '{}');
+    const jobId = new URLSearchParams(window.location.search).get("jobId");
+
+    fetch(lbm_settings.ajax_url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams({
+            action: 'lbm/tenant_not_in',
+            _ajax_nonce: lbm_settings.nonce,
+            jobId: jobId,
+            engineerId: lbm_settings.engineer_id,
+            tenantNotIn: true,
+            timestamp: new Date().toISOString()
+        })
+    })
+        .then(res => res.json())
+        .then(response => {
+            if (response.success) {
+                swal({
+                    icon: 'success',
+                    title: 'Recorded',
+                    text: 'Tenant absence was sent to CRM.',
+                });
+            } else {
+                swal({
+                    icon: 'error',
+                    title: 'Failed',
+                    text: response.data?.message || 'Something went wrong.',
+                    confirmButtonColor: '#000'
+                });
+                console.error(response);
+            }
+            modal.classList.remove('show');
+        })
+        .catch(err => {
+            swal({
+                icon: 'error',
+                title: 'Error',
+                text: 'Unable to send request.',
+                confirmButtonColor: '#000'
+            });
+            modal.classList.remove('show');
+            console.error(err);
+        });
+}
+
+function submitFurtherWorks() {
+    const modal = document.querySelector('.further-modal');
+    const textarea = modal.querySelector('#further-details');
+    const details = textarea.value.trim();
+
+    if (!details) {
+        swal({
+            icon: 'warning',
+            title: 'Missing details',
+            text: 'Please enter further work request details.',
+            confirmButtonColor: '#000'
+        });
+        return;
+    }
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const jobId = urlParams.get("jobId");
+    const engineerId = lbm_settings.engineer_id;
+
+    fetch(lbm_settings.ajax_url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams({
+            action: 'lbm/future_works',
+            _ajax_nonce: lbm_settings.nonce,
+            jobId: jobId,
+            engineerId: engineerId,
+            details: details,
+            timestamp: new Date().toISOString()
+        })
+    })
+        .then(res => res.json())
+        .then(response => {
+            if (response.success) {
+                swal({
+                    icon: 'success',
+                    title: 'Submitted',
+                    text: 'Further works request was sent to CRM.',
+                    confirmButtonColor: '#000'
+                });
+            } else {
+                swal({
+                    icon: 'error',
+                    title: 'Failed',
+                    text: response.data?.message || 'Something went wrong.',
+                    confirmButtonColor: '#000'
+                });
+                console.error(response);
+            }
+            modal.classList.remove('show');
+        })
+        .catch(err => {
+            swal({
+                icon: 'error',
+                title: 'Error',
+                text: 'Request failed.',
+                confirmButtonColor: '#000'
+            });
+            modal.classList.remove('show');
+            console.error(err);
+        });
+}
+
+function submitCheckin() {
+    const modal = document.querySelector('.checkin-modal');
+    const timeInput = modal.querySelector('.checkin-time');
+    const selectedTime = new Date(timeInput.value).toISOString();
+
+    const jobId = new URLSearchParams(window.location.search).get("id");
+    const jobId2 = new URLSearchParams(window.location.search).get("jobId");
+    const engineerId = lbm_settings.engineer_id;
+
+    fetch(lbm_settings.ajax_url, {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: new URLSearchParams({
+            action: "lbm/check_in",
+            _ajax_nonce: lbm_settings.nonce,
+            jobId: jobId,
+            engineerId: engineerId,
+            checkinTime: selectedTime
+        })
+    })
+        .then(res => res.json())
+        .then(response => {
+            if (response.success) {
+                swal({
+                    icon: "success",
+                    title: "Success",
+                    text: "Check-in successful"
+                });
+            } else {
+                swal({
+                    icon: "error",
+                    title: "Failed",
+                    text: "Check-in failed: " + (response.data?.message || "Unknown error")
+                });
+                console.error(response);
+            }
+            modal.style.display = "none";
+        })
+        .catch(err => {
+            swal({
+                icon: "error",
+                title: "Failed",
+                text: "Request error."
+            });
+            console.error(err);
+            modal.style.display = "none";
+        });
+}
+
 document.addEventListener("DOMContentLoaded", function () {
     const container = document.querySelector(".view_single_job");
     if (!container) return;
@@ -614,7 +774,7 @@ document.addEventListener("DOMContentLoaded", function () {
           <h2>Check-in</h2>
           <div class="modal-actions">
           <input type="datetime-local" value="${new Date().toISOString().slice(0, 16)}" class="checkin-time" />
-          <button class="btn w-full mt-4" onclick="alert('Check-in saved!'); this.closest('.checkin-modal').style.display = 'none'">Confirm</button>
+          <button class="btn w-full mt-4" onclick="submitCheckin()">Confirm</button>
           </div>
         </div>
       </div>
@@ -625,7 +785,7 @@ document.addEventListener("DOMContentLoaded", function () {
             <button class="modal-close" onclick="this.closest('.modal').style.display = 'none'">&times;</button>
             <h2>Tenant not in</h2>
             <div class="modal-actions">
-            <button class="btn w-full mt-4" onclick="alert('Marked as tenant not in!'); this.closest('.modal').style.display = 'none'">Confirm</button>
+            <button class="btn w-full mt-4" onclick="submitTenantNotIn()">Confirm</button>
             <button class="btn w-full mt-2" onclick="this.closest('.modal').style.display = 'none'">Cancel</button>
             </div>
           </div>
@@ -641,7 +801,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 <label for="further-details">Details</label>
                 <textarea id="further-details" rows="4" style="width: 100%; margin-top: 0.5rem; border: 1px solid #ccc; border-radius: 6px; padding: 8px;"></textarea>
                 </div>
-                <button class="btn w-full mt-4" onclick="alert('Further works requested!'); this.closest('.modal').style.display = 'none'">Confirm</button>
+                <button class="btn w-full mt-4" onclick="submitFurtherWorks()">Confirm</button>
                 <button class="btn w-full mt-2" onclick="this.closest('.modal').style.display = 'none'">Cancel</button>
             </div>
           </div>
