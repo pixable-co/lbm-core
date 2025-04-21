@@ -1,5 +1,5 @@
-.jobs-wrapper {
-    padding: 16px;
+.jobs-section {
+    margin-top: 1.5rem;
 }
 
 .jobs-heading {
@@ -11,7 +11,8 @@
 .jobs-date-heading {
     font-size: 1rem;
     font-weight: 500;
-    margin-bottom: 0.5rem;
+    margin-bottom: 1rem;
+    margin-left: 0.2rem;
 }
 
 .jobs-list {
@@ -29,7 +30,7 @@
 .job-card {
     border: 1px solid #e5e7eb;
     border-radius: 8px;
-    padding: 16px;
+    padding: 12px;
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
     background-color: white;
     transition: box-shadow 0.2s ease;
@@ -68,6 +69,12 @@
     line-height: 1.4;
 }
 
+.job-status-wrapper {
+    margin-top: -2.2rem;
+    display: flex;
+    justify-content: end;
+}
+
 .job-status {
     display: inline-block;
     font-size: 12px;
@@ -77,6 +84,28 @@
     border-radius: 6px;
 }
 
+.jobs-loader {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 24px;
+    height: 400px;
+}
+
+.jobs-loader .spinner {
+    width: 64px;
+    height: 64px;
+    border: 2px solid #e5e7eb;
+    border-top: 2px solid #000000; /* blue-500 */
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
 
 .job-wrapper {
     padding: 1rem;

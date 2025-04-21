@@ -9,6 +9,12 @@ document.addEventListener("DOMContentLoaded", function () {
             return;
         }
 
+        // Add spinner loader
+        const loader = document.createElement("div");
+        loader.className = "jobs-loader";
+        loader.innerHTML = `<div class="spinner"></div>`;
+        container.appendChild(loader);
+
         fetch(lbm_settings.ajax_url, {
             method: 'POST',
             headers: {
@@ -24,8 +30,11 @@ document.addEventListener("DOMContentLoaded", function () {
             .then(response => {
                 if (response.success && response.data?.pastJobs) {
                     const groupedJobs = groupJobsByDate(response.data.pastJobs);
+                    container.removeChild(loader);
                     renderJobs(container, groupedJobs);
+
                 } else {
+                    container.removeChild(loader);
                     container.innerHTML = "<p>Failed to load jobs.</p>";
                     console.error("Job fetch failed:", response);
                 }
@@ -78,11 +87,6 @@ document.addEventListener("DOMContentLoaded", function () {
     function renderJobs(container, data) {
         const wrapper = document.createElement("div");
         wrapper.className = "jobs-wrapper";
-
-        const heading = document.createElement("h3");
-        heading.className = "jobs-heading";
-        heading.textContent = "My Past Jobs";
-        wrapper.appendChild(heading);
 
         if (data.length === 0) {
             wrapper.innerHTML += "<p>No past jobs found.</p>";
@@ -137,8 +141,16 @@ document.addEventListener("DOMContentLoaded", function () {
                         addressEl.appendChild(lineDiv);
                     });
 
+
                     const statusEl = document.createElement("div");
-                    statusEl.innerHTML = `<span class="job-status">${job.status}</span>`;
+                    statusEl.className = "job-status-wrapper";
+
+                    const statusSpan = document.createElement("span");
+                    statusSpan.className = "job-status";
+                    statusSpan.textContent = job.status;
+
+                    statusEl.appendChild(statusSpan);
+                    card.appendChild(statusEl);
 
                     card.appendChild(topRow);
                     card.appendChild(addressEl);
@@ -169,6 +181,11 @@ document.addEventListener("DOMContentLoaded", function () {
             return;
         }
 
+        const loader = document.createElement("div");
+        loader.className = "jobs-loader";
+        loader.innerHTML = `<div class="spinner"></div>`;
+        container.appendChild(loader);
+
         fetch(lbm_settings.ajax_url, {
             method: 'POST',
             headers: {
@@ -184,8 +201,10 @@ document.addEventListener("DOMContentLoaded", function () {
             .then(response => {
                 if (response.success && response.data?.upcomingJobs) {
                     const groupedJobs = groupJobsByDate(response.data.upcomingJobs);
+                    container.removeChild(loader);
                     renderJobs(container, groupedJobs);
                 } else {
+                    container.removeChild(loader);
                     container.innerHTML = "<p>Failed to load upcoming jobs.</p>";
                     console.error("Job fetch failed:", response);
                 }
@@ -214,7 +233,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
             const formattedJob = {
                 id: job.CRM_Job_Id,
-                displayId: job.Job_Number?.replace("JOB - ", ""),
+                displayId: job.Job_Id?.replace("JOB - ", ""),
                 time: start.toLocaleTimeString("en-GB", { hour: '2-digit', minute: '2-digit' }),
                 duration: `${durationHours} hour${durationHours > 1 ? 's' : ''} ${durationMins} mins`,
                 address: [
@@ -238,11 +257,6 @@ document.addEventListener("DOMContentLoaded", function () {
     function renderJobs(container, data) {
         const wrapper = document.createElement("div");
         wrapper.className = "jobs-wrapper";
-
-        const heading = document.createElement("h3");
-        heading.className = "jobs-heading";
-        heading.textContent = "Upcoming Jobs";
-        wrapper.appendChild(heading);
 
         if (data.length === 0) {
             wrapper.innerHTML += "<p>No upcoming jobs found.</p>";
@@ -298,7 +312,14 @@ document.addEventListener("DOMContentLoaded", function () {
                     });
 
                     const statusEl = document.createElement("div");
-                    statusEl.innerHTML = `<span class="job-status">${job.status}</span>`;
+                    statusEl.className = "job-status-wrapper";
+
+                    const statusSpan = document.createElement("span");
+                    statusSpan.className = "job-status";
+                    statusSpan.textContent = job.status;
+
+                    statusEl.appendChild(statusSpan);
+                    card.appendChild(statusEl);
 
                     card.appendChild(topRow);
                     card.appendChild(addressEl);
