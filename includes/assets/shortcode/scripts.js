@@ -345,6 +345,12 @@ document.addEventListener("DOMContentLoaded", function () {
 
 // Utility: Upload file to Zoho WorkDrive
 async function uploadToZoho(file, previewContainer) {
+    // Create loader
+    const loader = document.createElement('div');
+    loader.className = 'upload-loader';
+    loader.innerHTML = `<div class="spinner"></div>`;
+    previewContainer.appendChild(loader);
+
     const checkRes = await fetch(lbm_settings.ajax_url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -356,19 +362,8 @@ async function uploadToZoho(file, previewContainer) {
 
     const result = await checkRes.json();
     if (!result.success) {
-        alert('Not authorized with Zoho. Redirecting...');
-        const clientId = '1000.ZDSET1BTZH3EOM50JCC6I58FH1GLSZ';
-        const redirectUri = 'http://localhost:10028';
-        const scope = [
-            'workdrive.files.READ',
-            'workdrive.files.CREATE',
-            'workdrive.files.UPDATE',
-            'workdrive.workspace.READ',
-            'workdrive.team.READ',
-        ].join(',');
-
-        const authUrl = `https://accounts.zoho.eu/oauth/v2/auth?scope=${scope}&client_id=${clientId}&response_type=code&access_type=offline&prompt=consent&redirect_uri=${encodeURIComponent(redirectUri)}`;
-        window.location.href = authUrl;
+        loader.remove();
+        alert('Zoho is not connected. Please contact admin.');
         return;
     }
 
@@ -383,6 +378,7 @@ async function uploadToZoho(file, previewContainer) {
     });
 
     const data = await uploadRes.json();
+    loader.remove(); // Remove loader when done
     console.log('Upload result:', data);
 
     if (!data.success) {
@@ -406,6 +402,9 @@ async function uploadToZoho(file, previewContainer) {
     wrapper.appendChild(removeBtn);
     previewContainer.appendChild(wrapper);
 }
+
+
+
 
 function initSignaturePad(container) {
     const canvas = document.createElement('canvas');
