@@ -1,6 +1,12 @@
 <?php
 namespace LBMCore;
 
+use LBMCore\FutureWorks;
+
+use LBMCore\TenantNotIn;
+
+use LBMCore\CheckIn;
+
 use LBMCore\ZohoWorkdriveUpload;
 
 use LBMCore\GetJobById;
@@ -21,5 +27,8 @@ class Ajax {
 		GetUpcomingJobs::init();
 		GetJobById::init();
 		ZohoWorkdriveUpload::init();
+		CheckIn::init();
+		TenantNotIn::init();
+		FutureWorks::init();
 	}
 }
