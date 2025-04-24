@@ -1,6 +1,8 @@
 <?php
 namespace LBMCore;
 
+use LBMCore\UpdateNote;
+
 use LBMCore\FutureWorks;
 
 use LBMCore\TenantNotIn;
@@ -30,5 +32,6 @@ class Ajax {
 		CheckIn::init();
 		TenantNotIn::init();
 		FutureWorks::init();
+		UpdateNote::init();
 	}
 }

@@ -729,6 +729,7 @@ document.addEventListener("DOMContentLoaded", function () {
               Upload
               <input type="file" class="media-input" data-type="pre" multiple accept="image/*">
             </label>
+            <input type="hidden" name="pre_work_folder_id" class="pre-folder-id" value="${job.Pre_Work_Mediafolder_ID || ''}">
             <div class="media-preview pre"></div>
           </div>
         </div>
@@ -740,6 +741,7 @@ document.addEventListener("DOMContentLoaded", function () {
               Upload
               <input type="file" class="media-input" data-type="post" multiple accept="image/*">
             </label>
+            <input type="hidden" name="post_work_folder_id" class="post-folder-id" value="${job.Post_Work_Mediafolder_ID || ''}">
             <div class="media-preview post"></div>
           </div>
         </div>
@@ -750,20 +752,11 @@ document.addEventListener("DOMContentLoaded", function () {
           <p class="job-sig-name">${job.Tenant_Name}<br>${dateStr}</p>
           <button class="btn w-full">Save</button>
         </div>
-
+        
         <div class="job-notes">
-          <textarea placeholder="Add a note..."></textarea>
-          <button class="btn w-full">Add Note</button>
-
-          <div class="note-entry">
-            <p>Example note one.</p>
-            <span>10:12 | ${dateStr}</span>
-          </div>
-
-          <div class="note-entry">
-            <p>Example note two.</p>
-            <span>12:41 | ${dateStr}</span>
-          </div>
+            <textarea placeholder="Add a note..."></textarea>
+            <button class="btn w-full">Add Note</button>
+            <div class="note-list"></div>
         </div>
       </div>
 
@@ -811,6 +804,33 @@ document.addEventListener("DOMContentLoaded", function () {
         const sigPad = container.querySelector(".signature-pad");
         if (sigPad) initSignaturePad(sigPad);
 
+        // Render job notes
+        const notesContainer = container.querySelector(".note-list");
+        if (Array.isArray(job.Notes) && job.Notes.length > 0) {
+            job.Notes.forEach(note => {
+                const createdTime = new Date(note.Created_Time);
+                const timeStr = createdTime.toLocaleTimeString("en-GB", {
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+                const dateStr = createdTime.toLocaleDateString("en-GB", {
+                    day: '2-digit',
+                    month: 'short',
+                    year: 'numeric'
+                });
+
+                const noteEntry = document.createElement("div");
+                noteEntry.className = "note-entry";
+                noteEntry.innerHTML = `
+            <p><strong>${note.Note_Title || 'Note'}:</strong> ${note.Note_Content}</p>
+            <span>${timeStr} | ${dateStr}</span>
+        `;
+                notesContainer.appendChild(noteEntry);
+            });
+        } else {
+            notesContainer.innerHTML = "<p style='opacity: 0.6;'>No notes yet.</p>";
+        }
+
         // Uploaders
         const uploadInputs = container.querySelectorAll(".media-input");
         uploadInputs.forEach(input => {
@@ -818,6 +838,57 @@ document.addEventListener("DOMContentLoaded", function () {
             input.addEventListener("change", (e) => {
                 Array.from(e.target.files).forEach(file => uploadToZoho(file, preview));
             });
+        });
+
+        const noteTextarea = container.querySelector(".job-notes textarea");
+        const addNoteButton = container.querySelector(".job-notes button");
+        const noteList = container.querySelector(".note-list");
+
+        addNoteButton.addEventListener("click", () => {
+            const noteContent = noteTextarea.value.trim();
+            if (!noteContent) {
+                return swal({ icon: "warning", text: "Note content is required." });
+            }
+
+            const jobId = job.CRM_Job_Id; // from API response
+            const noteTitle = "Engineer Note"; // or use another input for custom titles
+
+            fetch(lbm_settings.ajax_url, {
+                method: "POST",
+                headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                body: new URLSearchParams({
+                    action: "frohub/update_note",
+                    _ajax_nonce: lbm_settings.nonce,
+                    jobId,
+                    noteTitle,
+                    noteContent
+                })
+            })
+                .then(res => res.json())
+                .then(response => {
+                    if (response.data.message) {
+                        // Clear textarea
+                        noteTextarea.value = "";
+
+                        // Add to DOM
+                        const now = new Date();
+                        const noteEntry = document.createElement("div");
+                        noteEntry.className = "note-entry";
+                        noteEntry.innerHTML = `
+                <p><strong>${noteTitle}:</strong> ${noteContent}</p>
+                <span>${now.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" })} | ${now.toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" })}</span>
+            `;
+                        noteList.prepend(noteEntry);
+
+                        swal({ icon: "success", text: "Note added to CRM." });
+                    } else {
+                        throw new Error(response?.data?.message || "Unknown error.");
+                    }
+                })
+                .catch(err => {
+                    console.error("Add Note Error:", err);
+                    swal({ icon: "error", text: "Failed to add note." });
+                });
         });
     }
 });

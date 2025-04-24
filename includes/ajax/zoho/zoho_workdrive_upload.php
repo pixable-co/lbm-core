@@ -5,9 +5,9 @@ if (!defined('ABSPATH')) exit;
 
 class ZohoWorkdriveUpload
 {
-    private $client_id     = '1000.8M8M2KA75MCGTEPVYNBVNAYB3TE4JW';
-    private $client_secret = '084517f1ad120abe6fa8e855fc9064e9f717f2bc6e';
-    private $refresh_token = '1000.f0915d861e28f1def767b1844918e38d.74767d8ac604867c307a9302d9d090e2';
+    private $client_id     = '1000.L3VVIRY7H7RJUFQPJBSV1XD8KRV3IY';
+    private $client_secret = 'c74ef031a3971bf563cd06a78a5a2a9cdba5981087';
+    private $refresh_token = '1000.3495cb8e75490430c45707c0dc3f6f06.74c88dbc1b261d9e0c75e453fcb74264';
     private $folder_id     = 'jimrt41cb91618ccd4eb98e8fd8bf80b98047';
 
     public static function init()
