@@ -9,6 +9,12 @@ document.addEventListener("DOMContentLoaded", function () {
             return;
         }
 
+        // Add spinner loader
+        const loader = document.createElement("div");
+        loader.className = "jobs-loader";
+        loader.innerHTML = `<div class="spinner"></div>`;
+        container.appendChild(loader);
+
         fetch(lbm_settings.ajax_url, {
             method: 'POST',
             headers: {
@@ -24,8 +30,11 @@ document.addEventListener("DOMContentLoaded", function () {
             .then(response => {
                 if (response.success && response.data?.pastJobs) {
                     const groupedJobs = groupJobsByDate(response.data.pastJobs);
+                    container.removeChild(loader);
                     renderJobs(container, groupedJobs);
+
                 } else {
+                    container.removeChild(loader);
                     container.innerHTML = "<p>Failed to load jobs.</p>";
                     console.error("Job fetch failed:", response);
                 }
@@ -79,11 +88,6 @@ document.addEventListener("DOMContentLoaded", function () {
         const wrapper = document.createElement("div");
         wrapper.className = "jobs-wrapper";
 
-        const heading = document.createElement("h3");
-        heading.className = "jobs-heading";
-        heading.textContent = "My Past Jobs";
-        wrapper.appendChild(heading);
-
         if (data.length === 0) {
             wrapper.innerHTML += "<p>No past jobs found.</p>";
         } else {
@@ -101,7 +105,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
                 jobs.forEach(job => {
                     const link = document.createElement("a");
-                    link.href = `/view-job/?id=${job.id}`;
+                    link.href = `/view-job/?id=${job.id}&jobId=${job.displayId}`;
                     link.className = "job-link";
 
                     const card = document.createElement("div");
@@ -137,8 +141,16 @@ document.addEventListener("DOMContentLoaded", function () {
                         addressEl.appendChild(lineDiv);
                     });
 
+
                     const statusEl = document.createElement("div");
-                    statusEl.innerHTML = `<span class="job-status">${job.status}</span>`;
+                    statusEl.className = "job-status-wrapper";
+
+                    const statusSpan = document.createElement("span");
+                    statusSpan.className = "job-status";
+                    statusSpan.textContent = job.status;
+
+                    statusEl.appendChild(statusSpan);
+                    card.appendChild(statusEl);
 
                     card.appendChild(topRow);
                     card.appendChild(addressEl);
@@ -169,6 +181,11 @@ document.addEventListener("DOMContentLoaded", function () {
             return;
         }
 
+        const loader = document.createElement("div");
+        loader.className = "jobs-loader";
+        loader.innerHTML = `<div class="spinner"></div>`;
+        container.appendChild(loader);
+
         fetch(lbm_settings.ajax_url, {
             method: 'POST',
             headers: {
@@ -184,8 +201,10 @@ document.addEventListener("DOMContentLoaded", function () {
             .then(response => {
                 if (response.success && response.data?.upcomingJobs) {
                     const groupedJobs = groupJobsByDate(response.data.upcomingJobs);
+                    container.removeChild(loader);
                     renderJobs(container, groupedJobs);
                 } else {
+                    container.removeChild(loader);
                     container.innerHTML = "<p>Failed to load upcoming jobs.</p>";
                     console.error("Job fetch failed:", response);
                 }
@@ -214,7 +233,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
             const formattedJob = {
                 id: job.CRM_Job_Id,
-                displayId: job.Job_Number?.replace("JOB - ", ""),
+                displayId: job.Job_Id?.replace("JOB - ", ""),
                 time: start.toLocaleTimeString("en-GB", { hour: '2-digit', minute: '2-digit' }),
                 duration: `${durationHours} hour${durationHours > 1 ? 's' : ''} ${durationMins} mins`,
                 address: [
@@ -239,11 +258,6 @@ document.addEventListener("DOMContentLoaded", function () {
         const wrapper = document.createElement("div");
         wrapper.className = "jobs-wrapper";
 
-        const heading = document.createElement("h3");
-        heading.className = "jobs-heading";
-        heading.textContent = "Upcoming Jobs";
-        wrapper.appendChild(heading);
-
         if (data.length === 0) {
             wrapper.innerHTML += "<p>No upcoming jobs found.</p>";
         } else {
@@ -261,7 +275,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
                 jobs.forEach(job => {
                     const link = document.createElement("a");
-                    link.href = `/view-job/?id=${job.id}`;
+                    link.href = `/view-job/?id=${job.id}&jobId=${job.displayId}`;
                     link.className = "job-link";
 
                     const card = document.createElement("div");
@@ -298,7 +312,14 @@ document.addEventListener("DOMContentLoaded", function () {
                     });
 
                     const statusEl = document.createElement("div");
-                    statusEl.innerHTML = `<span class="job-status">${job.status}</span>`;
+                    statusEl.className = "job-status-wrapper";
+
+                    const statusSpan = document.createElement("span");
+                    statusSpan.className = "job-status";
+                    statusSpan.textContent = job.status;
+
+                    statusEl.appendChild(statusSpan);
+                    card.appendChild(statusEl);
 
                     card.appendChild(topRow);
                     card.appendChild(addressEl);
@@ -336,7 +357,7 @@ async function uploadToZoho(file, previewContainer) {
     const result = await checkRes.json();
     if (!result.success) {
         alert('Not authorized with Zoho. Redirecting...');
-        const clientId = '1000.WHI5I22WABVPMWMO7RPJ6AYNVSK42T';
+        const clientId = '1000.ZDSET1BTZH3EOM50JCC6I58FH1GLSZ';
         const redirectUri = 'http://localhost:10028';
         const scope = [
             'workdrive.files.READ',
@@ -451,6 +472,166 @@ function initSignaturePad(container) {
     });
 }
 
+function submitTenantNotIn() {
+    const modal = document.querySelector('.tenant-modal');
+    const payload = JSON.parse(modal.dataset.payload || '{}');
+    const jobId = new URLSearchParams(window.location.search).get("jobId");
+
+    fetch(lbm_settings.ajax_url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams({
+            action: 'lbm/tenant_not_in',
+            _ajax_nonce: lbm_settings.nonce,
+            jobId: jobId,
+            engineerId: lbm_settings.engineer_id,
+            tenantNotIn: true,
+            timestamp: new Date().toISOString()
+        })
+    })
+        .then(res => res.json())
+        .then(response => {
+            if (response.success) {
+                swal({
+                    icon: 'success',
+                    title: 'Recorded',
+                    text: 'Tenant absence was sent to CRM.',
+                });
+            } else {
+                swal({
+                    icon: 'error',
+                    title: 'Failed',
+                    text: response.data?.message || 'Something went wrong.',
+                    confirmButtonColor: '#000'
+                });
+                console.error(response);
+            }
+            modal.classList.remove('show');
+        })
+        .catch(err => {
+            swal({
+                icon: 'error',
+                title: 'Error',
+                text: 'Unable to send request.',
+                confirmButtonColor: '#000'
+            });
+            modal.classList.remove('show');
+            console.error(err);
+        });
+}
+
+function submitFurtherWorks() {
+    const modal = document.querySelector('.further-modal');
+    const textarea = modal.querySelector('#further-details');
+    const details = textarea.value.trim();
+
+    if (!details) {
+        swal({
+            icon: 'warning',
+            title: 'Missing details',
+            text: 'Please enter further work request details.',
+            confirmButtonColor: '#000'
+        });
+        return;
+    }
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const jobId = urlParams.get("jobId");
+    const engineerId = lbm_settings.engineer_id;
+
+    fetch(lbm_settings.ajax_url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams({
+            action: 'lbm/future_works',
+            _ajax_nonce: lbm_settings.nonce,
+            jobId: jobId,
+            engineerId: engineerId,
+            details: details,
+            timestamp: new Date().toISOString()
+        })
+    })
+        .then(res => res.json())
+        .then(response => {
+            if (response.success) {
+                swal({
+                    icon: 'success',
+                    title: 'Submitted',
+                    text: 'Further works request was sent to CRM.',
+                    confirmButtonColor: '#000'
+                });
+            } else {
+                swal({
+                    icon: 'error',
+                    title: 'Failed',
+                    text: response.data?.message || 'Something went wrong.',
+                    confirmButtonColor: '#000'
+                });
+                console.error(response);
+            }
+            modal.classList.remove('show');
+        })
+        .catch(err => {
+            swal({
+                icon: 'error',
+                title: 'Error',
+                text: 'Request failed.',
+                confirmButtonColor: '#000'
+            });
+            modal.classList.remove('show');
+            console.error(err);
+        });
+}
+
+function submitCheckin() {
+    const modal = document.querySelector('.checkin-modal');
+    const timeInput = modal.querySelector('.checkin-time');
+    const selectedTime = new Date(timeInput.value).toISOString();
+
+    const jobId = new URLSearchParams(window.location.search).get("id");
+    const jobId2 = new URLSearchParams(window.location.search).get("jobId");
+    const engineerId = lbm_settings.engineer_id;
+
+    fetch(lbm_settings.ajax_url, {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: new URLSearchParams({
+            action: "lbm/check_in",
+            _ajax_nonce: lbm_settings.nonce,
+            jobId: jobId,
+            engineerId: engineerId,
+            checkinTime: selectedTime
+        })
+    })
+        .then(res => res.json())
+        .then(response => {
+            if (response.success) {
+                swal({
+                    icon: "success",
+                    title: "Success",
+                    text: "Check-in successful"
+                });
+            } else {
+                swal({
+                    icon: "error",
+                    title: "Failed",
+                    text: "Check-in failed: " + (response.data?.message || "Unknown error")
+                });
+                console.error(response);
+            }
+            modal.style.display = "none";
+        })
+        .catch(err => {
+            swal({
+                icon: "error",
+                title: "Failed",
+                text: "Request error."
+            });
+            console.error(err);
+            modal.style.display = "none";
+        });
+}
+
 document.addEventListener("DOMContentLoaded", function () {
     const container = document.querySelector(".view_single_job");
     if (!container) return;
@@ -459,7 +640,10 @@ document.addEventListener("DOMContentLoaded", function () {
     const jobId = params.get("id");
     if (!jobId) return (container.innerHTML = "<p>Missing job ID.</p>");
 
-    container.innerHTML = `<p class="job-loading">Loading job details...</p>`;
+    const loader = document.createElement("div");
+    loader.className = "jobs-loader";
+    loader.innerHTML = `<div class="spinner"></div>`;
+    container.appendChild(loader);
 
     fetch(lbm_settings.ajax_url, {
         method: "POST",
@@ -475,12 +659,15 @@ document.addEventListener("DOMContentLoaded", function () {
         .then((res) => res.json())
         .then((response) => {
             if (response.success && response.data?.jobDetails) {
+                container.removeChild(loader);
                 renderJob(container, response.data.jobDetails);
             } else {
+                container.removeChild(loader);
                 container.innerHTML = `<p>Failed to load job: ${response?.data?.message || "unknown error"}</p>`;
             }
         })
         .catch((err) => {
+            container.removeChild(loader);
             container.innerHTML = `<p>Error fetching job details.</p>`;
             console.error(err);
         });
@@ -504,30 +691,36 @@ document.addEventListener("DOMContentLoaded", function () {
         container.innerHTML = `
       <div class="job-wrapper">
         <div class="job-header">
-          <h2>Job > ${job.Job_Id?.replace("JOB - ", "")}</h2>
+          <h3>Job > ${job.Job_Id?.replace("JOB - ", "") || job.Job_Number?.replace("JOB - ", "")}</h3>
           <span class="job-status">${job.Status}</span>
         </div>
 
         <div class="job-meta">
-          <p><strong>Date:</strong> ${dateStr}</p>
-          <p><strong>Time:</strong> ${timeStr}</p>
-          <p><strong>Duration:</strong> ${duration}</p>
-          <div>
+          <div class="job-meta-info"><strong>Date:</strong> ${dateStr}</div>
+          <div class="job-meta-info"><strong>Time:</strong> ${timeStr}</div>
+          <div class="job-meta-info"><strong>Duration:</strong> ${duration}</div>
+          <div class="job-meta-info">
             <strong>Address:</strong>
+            <div>
             <div>${job.Tenant_Address_1?.name || ""}</div>
             <div>${job.Tenant_City || ""}</div>
             <div>${job.Tenant_Post_Code || ""}</div>
+            </div>
           </div>
-          ${job.Sales_Order ? `<p><strong>Sales Order:</strong> ${job.Sales_Order}</p>` : ""}
-          <p><strong>Tenant:</strong> ${job.Tenant_Name} (${job.Tenant_Phone})
+          ${job.Sales_Order ? `<div class="job-meta-info"><strong>Sales Order:</strong> ${job.Sales_Order}</div>` : ""}
+          <div class="job-meta-info">
+            <strong>Tenant:</strong>
+            <div>
+            ${job.Tenant_Name} (${job.Tenant_Phone})
             <a href="tel:${job.Tenant_Phone}" class="job-call">📞</a>
-          </p>
+            </div>
+          </div>
         </div>
 
         <div class="job-actions">
           <button class="btn btn-checkin" onclick="document.querySelector('.checkin-modal').style.display = 'flex'">Check-in</button>
-          <button class="btn">Tenant not in</button>
-          <button class="btn">Further Works</button>
+          <button class="btn" onclick="document.querySelector('.tenant-modal').style.display = 'flex'">Tenant not in</button>
+          <button class="btn" onclick="document.querySelector('.further-modal').style.display = 'flex'">Further Works</button>
         </div>
 
         <div class="job-media">
@@ -575,14 +768,44 @@ document.addEventListener("DOMContentLoaded", function () {
         </div>
       </div>
 
-      <div class="checkin-modal" style="display:none;">
+      <div class="modal checkin-modal" style="display:none;">
         <div class="modal-content">
           <button class="modal-close" onclick="this.closest('.checkin-modal').style.display = 'none'">&times;</button>
           <h2>Check-in</h2>
+          <div class="modal-actions">
           <input type="datetime-local" value="${new Date().toISOString().slice(0, 16)}" class="checkin-time" />
-          <button class="btn w-full mt-4" onclick="alert('Check-in saved!'); this.closest('.checkin-modal').style.display = 'none'">Confirm</button>
+          <button class="btn w-full mt-4" onclick="submitCheckin()">Confirm</button>
+          </div>
         </div>
       </div>
+      
+      <!-- Tenant Not In Modal -->
+        <div class="modal tenant-modal" style="display:none;">
+          <div class="modal-content">
+            <button class="modal-close" onclick="this.closest('.modal').style.display = 'none'">&times;</button>
+            <h2>Tenant not in</h2>
+            <div class="modal-actions">
+            <button class="btn w-full mt-4" onclick="submitTenantNotIn()">Confirm</button>
+            <button class="btn w-full mt-2" onclick="this.closest('.modal').style.display = 'none'">Cancel</button>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Further Works Modal -->
+        <div class="modal further-modal" style="display:none;">
+          <div class="modal-content">
+            <button class="modal-close" onclick="this.closest('.modal').style.display = 'none'">&times;</button>
+            <h2>Request Further Works</h2>
+            <div class="modal-actions">
+                <div>
+                <label for="further-details">Details</label>
+                <textarea id="further-details" rows="4" style="width: 100%; margin-top: 0.5rem; border: 1px solid #ccc; border-radius: 6px; padding: 8px;"></textarea>
+                </div>
+                <button class="btn w-full mt-4" onclick="submitFurtherWorks()">Confirm</button>
+                <button class="btn w-full mt-2" onclick="this.closest('.modal').style.display = 'none'">Cancel</button>
+            </div>
+          </div>
+        </div>
     `;
 
         // Signature pad

@@ -5,8 +5,8 @@ if (!defined('ABSPATH')) exit;
 
 class ZohoWorkdriveUpload
 {
-    private $client_id     = '1000.WHI5I22WABVPMWMO7RPJ6AYNVSK42T';
-    private $client_secret = 'd8385c4bc47b5aec86e18707cf9430d3cfabd005cf';
+    private $client_id     = '1000.ZDSET1BTZH3EOM50JCC6I58FH1GLSZ';
+    private $client_secret = '767bd3f7cae94b13cfb959e2ccb3dfdb1ef79dc1f8';
     private $folder_id     = '6wqe2ac49aee129914b04a6d0b95560e5f71d';
     private $redirect_uri  = 'http://localhost:10028';
 

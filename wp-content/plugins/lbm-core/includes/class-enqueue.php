@@ -16,7 +16,8 @@ class Enqueue {
 	public function lbm_scripts() {
 	        $current_user_id = get_current_user_id();
 	        wp_enqueue_style( 'lbm-shortcode-style', LBM_ROOT_DIR_URL . 'includes/assets/shortcode/style.css' );
-	        wp_enqueue_script( 'lbm-shortcode-script', LBM_ROOT_DIR_URL . 'includes/assets/shortcode/scripts.js', 'jquery', '0.0.1', true );
+	        wp_enqueue_script( 'lbm-shortcode-script', LBM_ROOT_DIR_URL . 'includes/assets/shortcode/scripts.js', 'jquery', '0.0.2', true );
+	        wp_enqueue_script('sweetalert2', 'https://unpkg.com/sweetalert/dist/sweetalert.min.js', [], null, true);
 // 			wp_enqueue_style( 'lbm-build-style', LBM_ROOT_DIR_URL . 'includes/assets/build/frontend.css' );
 // 			wp_enqueue_script( 'lbm-build-script', LBM_ROOT_DIR_URL . 'includes/assets/build/frontend.js', 'jquery', '0.0.1', true );
 			wp_localize_script(

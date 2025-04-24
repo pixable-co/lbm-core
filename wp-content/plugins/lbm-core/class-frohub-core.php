@@ -3,14 +3,14 @@
 	/**
 	 *
 	 * @link              https://pixable.co/
-	 * @since             0.0.1
+	 * @since             0.0.2
 	 * @package           LMB Core Plugin
 	 *
 	 * @wordpress-plugin
 	 * Plugin Name:       LMB Core Plugin
 	 * Plugin URI:        https://pixable.co/
 	 * Description:       Core Plugin & Functions For LBM
-	 * Version:           0.0.1
+	 * Version:           0.0.2
 	 * Author:            Pixable
 	 * Author URI:        https://pixable.co/
 	 * License:           GPL-2.0+
